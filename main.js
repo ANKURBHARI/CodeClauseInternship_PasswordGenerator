@@ -1,11 +1,14 @@
-import java.util.Scanner;
+import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.InputMismatchException;
+import java.util.Scanner;
 
 public class PasswordManager {
 
     private static Scanner scanner = new Scanner(System.in);
     private static ArrayList<String> generatedPasswords = new ArrayList<>();
     private static ArrayList<String> storedPasswords = new ArrayList<>();
+    private static SecureRandom secureRandom = new SecureRandom();
 
     public static void main(String[] args) {
         showMenu();
@@ -22,17 +25,8 @@ public class PasswordManager {
             System.out.println("5. Exit");
             System.out.print("Enter your choice: ");
 
-            // Use try-catch to handle non-integer input
-            try {
-                choice = scanner.nextInt();
-            } catch (Exception e) {
-                System.out.println("Invalid input. Please enter a number.");
-                scanner.nextLine(); // Consume the invalid input
-                continue;
-            }
-
-            scanner.nextLine(); // Consume the newline character
-
+            choice = readIntegerInput();
+            
             switch (choice) {
                 case 1:
                     generateAndDisplayPasswords();
@@ -55,28 +49,27 @@ public class PasswordManager {
         } while (choice != 5);
     }
 
+    private static int readIntegerInput() {
+        int input = 0;
+        while (true) {
+            try {
+                input = scanner.nextInt();
+                scanner.nextLine(); // Consume the newline character
+                break;
+            } catch (InputMismatchException e) {
+                System.out.println("Invalid input. Please enter a number.");
+                scanner.nextLine(); // Consume the invalid input
+            }
+        }
+        return input;
+    }
+
     private static void generateAndDisplayPasswords() {
         System.out.print("How many passwords do you want to generate: ");
-
-        int total;
-        try {
-            total = scanner.nextInt();
-        } catch (Exception e) {
-            System.out.println("Invalid input. Please enter a number.");
-            scanner.nextLine(); // Consume the invalid input
-            return;
-        }
+        int total = readIntegerInput();
 
         System.out.print("How many characters long do you want your random passwords to be: ");
-
-        int length;
-        try {
-            length = scanner.nextInt();
-        } catch (Exception e) {
-            System.out.println("Invalid input. Please enter a number.");
-            scanner.nextLine(); // Consume the invalid input
-            return;
-        }
+        int length = readIntegerInput();
 
         System.out.println("\nGenerated Passwords:");
         for (int i = 0; i < total; i++) {
@@ -89,8 +82,9 @@ public class PasswordManager {
 
     private static String generateRandomPassword(int length) {
         StringBuilder password = new StringBuilder();
+        String characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+";
         for (int i = 0; i < length; i++) {
-            password.append(randomCharacter());
+            password.append(characters.charAt(secureRandom.nextInt(characters.length())));
         }
         return password.toString();
     }
@@ -126,13 +120,8 @@ public class PasswordManager {
         }
     }
 
-    private static char randomCharacter() {
-        String characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+";
-        int rand = (int) (Math.random() * characters.length());
-        return characters.charAt(rand);
-    }
-
     private static String getPasswordStrength(String password) {
+       
         if (password.length() < 8) {
             return "Weak";
         } else if (password.length() < 12) {
